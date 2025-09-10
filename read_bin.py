@@ -43,3 +43,4 @@ with socket.socket() as soc:
         print(data.decode())
         if not data:
             break
+
