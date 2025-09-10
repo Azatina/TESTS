@@ -1,0 +1,114 @@
+print(time.ctime())
+
+# ! ! ! CALCULATOR ! ! !
+while True: print(eval(input('Введите выражение для вычисления\r\n')))
+
+
+from os import listdir
+from os.path import isfile, getsize, join, abspath
+from os.path import split as split_path
+
+TEST_PATH = 'C:\\Temp'
+
+if isfile(TEST_PATH):
+    files = [TEST_PATH]
+else:
+    files = [abspath(join(TEST_PATH, f)) for f in listdir(TEST_PATH) if isfile(join(TEST_PATH, f))]
+
+print(split_path(files)[-1])
+
+
+# pcap from HEX dump
+with open(FILE) as hexpcap:
+    pcap = b''
+    for line in hexpcap:
+        hexline = (line[10:33] + line[34:59]).replace(" ", "")
+        pcap += bytes.fromhex(hexline)
+
+# check server:port availability
+connection.connect_ex((SERVER, PORT))
+
+socket_list = [socket.socket(socket.AF_INET, socket.SOCK_STREAM).connect((SERVER, PORT)) if x._closed else x for x in socket_list]
+
+from itertools import cycle
+lst1 = cycle(my_str1)
+lst2 = cycle(my_str2)
+tries = N
+def my_func(a, b):
+    print(f'{a}{b}')
+    return
+for _ in range(tries):
+    my_func(next(lst1), next(lst2))
+lst3 = [1, 2, 3]
+lst4 = cycle(lst)
+i = 0
+while i in range(3):
+    print([next(lst4) for _ in range(2)])
+    i+=1
+
+# Parse JSON reqponse from API server
+# print(json.dumps(parsed_data, indent=2, sort_keys=False))
+# print(json.dumps(parsed_data, indent=4, sort_keys=True))
+# print("\r\n", "\t".join(f"{item}" for item in parsed_data.values()))
+
+
+# content_length = (int(line[len(cnt_len):]) for line in headers.spit(b'\r\n') if cnt_len in line)
+
+
+QseFT*710!
+sudo -i
+QseFT*710!
+
+exit
+exit
+
+
+WebKitBoundary = "".join(random.SystemRandom().choice(string.ascii_letters + string.digits) for _ in range(16))
+multi_head = (f"------WebKitFormBoundary{WebKitBoundary}\r\n"
+              f"Content-Disposition: form-data; name=\"file\"; filename=\"{FILE}\"\r\n"
+              f"Content-Type: application/octet-stream\r\n"
+              f"\r\n").encode()
+multi_tail = (f"------WebKitFormBoundary{WebKitBoundary}--\r\n"
+              f"0\r\n\r\n").encode()
+contlen_req = len(multi_head + pcap + multi_tail) - 7
+chunk_req = f"{hex(contlen_req).split('x')[-1]}\r\n".encode()
+http_head_req = (f"POST /web-api/upload-attachment/liza1 HTTP/1.1\r\n"
+                 f"Host: mail.yandex.ru\r\n"
+                 f"{add_hdr_http}"
+                 f"Content-Length: {contlen_req}\r\n"
+                 f"Content-Type: multipart/form-data; boundary=----WebKitFormBoundary{WebKitBoundary}\r\n"
+                 f"\r\n").encode()
+icap_head_req = (f"REQMOD icap://{SERVER}:{PORT}/icap/reqmod ICAP/1.0\r\n"
+                 f"Host: {SERVER}\r\n"
+                 f"Allow: 204\r\n"
+                 f"{add_hdr_icap}"
+                 f"Encapsulated: req-hdr=0, req-body={len(http_head_req)}\r\n"
+                 f"\r\n").encode()
+pcap1 = icap_head_req + http_head_req + chunk_req + multi_head + pcap + multi_tail
+
+http_head_resp = (f"GET /message_part_real/{quote(FILE)}?name={quote(FILE)} HTTP/1.1\r\n"
+                  f"Host: webattach.mail.yandex.net\r\n"
+                  f"Connection: keep-alive\r\n"
+                  f"Referer: https://mail.yandex.ru/\r\n"
+                  f"\r\n").encode()
+http_head_resp2 = (f"HTTP/1.1 200 OK\r\n"
+                   f"Connection: keep-alive\r\n"
+                   f"Server: nginx\r\n"
+                   f"Content-Type: text/plain;filename=\"{FILE}\";charset=\"US-ASCII\"\r\n"
+                   f"Content-Length: {len(FILE)}\r\n"
+                   f"Content-Disposition: attachment;filename=\"{FILE}\"\r\n"
+                   f"\r\n").encode()
+contlen_resp = len(pcap)
+chunk_resp = f"{hex(contlen_resp).split('x')[-1]}\r\n".encode()
+icap_head_resp = (f"RESPMOD icap://{SERVER}:{PORT}/icap/respmod ICAP/1.0\r\n"
+                  f"Host: {SERVER}\r\n"
+                  f"Allow: 204\r\n"
+                  f"{add_hdr_icap}"
+                  # f"Preview: 1024\r\n"
+                  f"Encapsulated: "
+                  f"req-hdr=0, "
+                  f"res-hdr={len(http_head_resp)}, "
+                  f"res-body={len(http_head_resp + http_head_resp2)}\r\n"
+                  f"\r\n").encode()
+pcap2 = icap_head_resp + http_head_resp + http_head_resp2 + chunk_resp + pcap + f"\r\n0\r\n\r\n".encode()
+
