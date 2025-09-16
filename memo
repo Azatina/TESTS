@@ -1,4 +1,8 @@
-print(time.ctime())
+print(time.ctime()) # current time (Tue Sep 16 18:09:41 2025)
+print(socket.gethostbyname(socket.gethostname())) # current IP
+print(socket.gethostbyname(socket.getfqdn())) # current IP
+print(socket.getfqdn()) # current FQDN
+print(socket.gethostname()) # current hostname (short)
 
 # ! ! ! CALCULATOR ! ! !
 while True: print(eval(input('Введите выражение для вычисления\r\n')))

@@ -1,4 +1,3 @@
-import os.path
 from itertools import cycle
 from multiprocessing.dummy import Pool as ThreadPool
 from os import listdir
@@ -12,8 +11,6 @@ import configparser
 import random
 import socket
 import string
-
-import threading  # ????
 
 import time
 
