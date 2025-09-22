@@ -1,3 +1,4 @@
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from itertools import cycle
 from multiprocessing.dummy import Pool as ThreadPool
 from os import listdir
@@ -263,6 +264,21 @@ def threads_sender(packet_list):
         pool.join()
     return
 
+def thread_maker(packet_list):
+    # Запуск с ограничением потоков
+    with ThreadPoolExecutor(max_workers=THREADS) as executor:
+        futures = {executor.submit(sender, arg): arg for arg in packet_list}
+        for future in as_completed(futures):
+            arg = futures[future]
+            try:
+                result = future.result()
+                print(f"Результат для arg={arg}: {result}")
+            except Exception as exc:
+                print(f"Ошибка при выполнении arg={arg}: {exc}")
+
+
+requests = [search_request, upload_request, download_request]
+requests_iter = cycle(requests)
 
 if __name__ in "__main__":
 
@@ -280,22 +296,11 @@ if __name__ in "__main__":
         print(f"Итерация {i}")
         file_i = next(files_iter)
         user_i = next(users_iter)
+        request_i = next(requests_iter)
         time.sleep(0.1)
-        threads_sender([(soc[k], search_request(file_i, user_i),
-                         file_i) for k in range(THREADS)])
-        time.sleep(0.1)
-        threads_sender([(soc[k], upload_request(file_i, next(users_iter)),
-                         file_i) for k in range(THREADS)])
-        # time.sleep(0.1)
-        # threads_sender([(soc[k],
-        #                  upload_request_stream(file_i, next(users_iter)),
-        #                  file_i) for k in range(THREADS)])
-        time.sleep(0.1)
-        threads_sender([(soc[k], download_request(file_i, next(users_iter)),
-                         file_i) for k in range(THREADS)])
-        time.sleep(0.1)
-        threads_sender([(soc[k], upload_request_nextcloud(file_i, next(users_iter)),
-                         file_i) for k in range(THREADS)])
+        threads_sender([(soc[k], next(requests_iter)(next(files_iter), next(users_iter)),
+                         next(files_iter)) for k in range(THREADS)])
+        thread_maker()
         i += 1
 
     for sock in soc:

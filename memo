@@ -120,3 +120,13 @@ with ThreadPool(THREADS) as pool:
     pool.map(lambda s: sender(*s), [(soc[k], FILE) for k in range(THREADS)])
     pool.close()
     pool.join()
+
+with ThreadPoolExecutor(max_workers=THREADS) as executor:
+    # submit всех задач
+    futures = [executor.submit(func, arg) for arg in args]
+
+    # Сбор результатов (опционально)
+    results = [future.result() for future in futures]
+
+print("Все задачи завершены.")
+print("Результаты:", results)
