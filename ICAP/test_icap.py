@@ -38,6 +38,9 @@ with open(USERSFILE, 'rb') as f:
     users_plain = f.read().split(b'\r\n')
     users = [base64.b64encode(u).decode() for u in users_plain]
 
+files_iter = cycle(files)
+users_iter = cycle(users)
+
 
 def add_hdr_http():
     add_http_hdr = (f"Connection: keep-alive\r\n"
@@ -58,7 +61,7 @@ def add_hdr_icap(username):
                     # f"Preview: 1024\r\n"
                     # f"Connection: keep-alive\r\n"
                     # f"X-Authenticated-Groups: \r\n"
-                    # f"X-Authenticated-User: {username}\r\n"
+                    f"X-Authenticated-User: {username}\r\n"
                     f"X-Client-IP: {CLIENT_IP}\r\n"
                     # f"X-Client-Username: {USER_PLAIN}\r\n"
                     # f"X-Filename: {quote('zxc   zxc')}\r\n"
@@ -241,12 +244,16 @@ def get_response(conn):
 def check_sockets(socket_list):
     if isinstance(socket_list, socket.socket):
         if socket_list.fileno() == -1:
-            return connector()
+            socket_list = socket.socket()
+            socket_list.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+            socket_list.connect((SERVER, PORT))
         return socket_list
     else:
         for socket_item in socket_list:
             if socket_item.fileno() == -1:
-                socket_item = connector()
+                socket_item = socket.socket()
+                socket_item.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+                socket_item.connect((SERVER, PORT))
 
 
 def threads_sender(packet_list):
@@ -258,6 +265,7 @@ def threads_sender(packet_list):
 
 
 if __name__ in "__main__":
+
     soc = [socket.socket() for _ in range(THREADS)]
     for sock in soc:
         sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
@@ -267,44 +275,27 @@ if __name__ in "__main__":
     st = time.time()
 
     i = 1
-    files_iter = cycle(files)
-    users_iter = cycle(users)
     # while True:
     while i < ITERATIONS+1:
         print(f"Итерация {i}")
         file_i = next(files_iter)
         user_i = next(users_iter)
-        #check_sockets(soc)
-        #arg_list = []
-        #print(arg_list)
-        #for k in range(THREADS):
-        #    file_i = next(files_iter)
-        #    user_i = next(users_iter)
-        #    arg_list.append((soc[k], search_request(file_i, user_i), file_i))
-        #threads_sender(arg_list)
-        #time.sleep(0.1)
-        #threads_sender([(soc[k],
-        #                 search_request(file_i, user_i),
-        #                 file_i) for k in range(THREADS)])
-        #time.sleep(0.1)
-        #threads_sender([(soc[k],
-        #                 upload_request(file_i, next(users_iter)),
-        #                 file_i) for k in range(THREADS)])
-        #time.sleep(0.1)
-        #threads_sender([(soc[k],
-        #                 upload_request_stream(file_i, next(users_iter)),
-        #                 file_i) for k in range(THREADS)])
-        #time.sleep(0.1)
-        #threads_sender([(soc[k], download_request(file_i, next(users_iter)),
-        #                 file_i) for k in range(THREADS)])
+        time.sleep(0.1)
+        threads_sender([(soc[k], search_request(file_i, user_i),
+                         file_i) for k in range(THREADS)])
+        time.sleep(0.1)
+        threads_sender([(soc[k], upload_request(file_i, next(users_iter)),
+                         file_i) for k in range(THREADS)])
+        # time.sleep(0.1)
+        # threads_sender([(soc[k],
+        #                  upload_request_stream(file_i, next(users_iter)),
+        #                  file_i) for k in range(THREADS)])
+        time.sleep(0.1)
+        threads_sender([(soc[k], download_request(file_i, next(users_iter)),
+                         file_i) for k in range(THREADS)])
         time.sleep(0.1)
         threads_sender([(soc[k], upload_request_nextcloud(file_i, next(users_iter)),
                          file_i) for k in range(THREADS)])
-        #check_sockets(soc)
-        #with ThreadPool(THREADS) as pool:
-        #    pool.map(lambda s: send_chunks(*s), [(soc[k], FILE) for k in range(THREADS)])
-        #    pool.close()
-        #    pool.join()
         i += 1
 
     for sock in soc:

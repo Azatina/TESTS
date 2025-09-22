@@ -116,3 +116,7 @@ icap_head_resp = (f"RESPMOD icap://{SERVER}:{PORT}/icap/respmod ICAP/1.0\r\n"
                   f"\r\n").encode()
 pcap2 = icap_head_resp + http_head_resp + http_head_resp2 + chunk_resp + pcap + f"\r\n0\r\n\r\n".encode()
 
+with ThreadPool(THREADS) as pool:
+    pool.map(lambda s: sender(*s), [(soc[k], FILE) for k in range(THREADS)])
+    pool.close()
+    pool.join()
